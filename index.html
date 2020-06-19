@@ -1,113 +1,92 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>Stripe Checkout Sample</title>
-    <meta name="description" content="A demo of Stripe client-only Checkout" />
 
-    <link rel="icon" href="favicon.ico" type="image/x-icon" />
-    <link rel="stylesheet" href="css/normalize.css" />
-    <link rel="stylesheet" href="css/global.css" />
-    <!-- Load Stripe.js on your website. -->
-    <script src="https://js.stripe.com/v3/"></script>
-  </head>
+<head>
+  <meta charset="utf-8" />
+  <title>InternHacks Sponsor Portal</title>
+  <meta name="description" content="A demo of Stripe client-only Checkout" />
 
-  <body>
-    <div class="sr-root">
-      <div class="sr-main" style="display: flex;">
-        <header class="sr-header">
-          <div class="sr-header__logo"></div>
-        </header>
-        <div class="sr-container">
-          <section class="container">
-            <h1>One-time Donation</h1>
-            <button
-              data-checkout-mode="payment"
-              data-price-id="sku_GU4JYXyvvRb2sX"
-            >
-              Donate $5.00 once
-            </button>
-            <button
-              data-checkout-mode="payment"
-              data-price-id="sku_GU4KO8nfdg8G2Z"
-            >
-              Donate $15.00 once
-            </button>
-            <button
-              data-checkout-mode="payment"
-              data-price-id="sku_GU4LB0wBViiYsm"
-            >
-              Donate $50.00 once
-            </button>
-          </section>
-          <section class="container">
-            <h1>Recurring Donation</h1>
-            <button
-              data-checkout-mode="subscription"
-              data-price-id="plan_GU4MXg0k0Uv1S6"
-            >
-              Donate $20.00 per month
-            </button>
-          </section>
-        </div>
-        <div id="error-message"></div>
-      </div>
+  <link rel="icon" href="favicon.png" type="image/x-icon" />
+  <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
+
+  <style>
+    button {
+      background-color: hsl(231, 41%, 29%);
+      color: rgb(255, 255, 255, 95%);
+    }
+
+    button:hover {
+      background-color: hsl(231, 41%, 39%);
+    }
+  </style>
+
+  <script src="https://js.stripe.com/v3/"></script>
+</head>
+
+<body class="antialiased">
+  <div class="max-w-sm mx-auto mt-24">
+    <img src="./illustration.png" alt="InternHacks Vector Art" class="">
+    <div class="hidden my-2 bg-red-300 shadow border rounded-lg border-red-500 text-red-800 py-2 px-4 font-semibold"
+      id="error-message"></div>
+    <div class="mt-12 flex flex-col shadow px-4 py-2 border border-gray-400 rounded-lg">
+      <button
+        class="transition shadow ease-in-out duration-150 focus:outline-none rounded-lg py-2 px-4 my-2 font-medium text-lg"
+        data-checkout-mode="payment" data-price-id="price_HLrH9SPAMvzOLl">
+        Bootstrap ($1500)
+      </button>
+      <button
+        class="transition shadow ease-in-out duration-150 focus:outline-none rounded-lg py-2 px-4 my-2 font-medium text-lg"
+        data-checkout-mode="payment" data-price-id="price_HLrIl3hLWGm8Mf">
+        Seed ($3000)
+      </button>
+      <button
+        class="transition shadow ease-in-out duration-150 focus:outline-none rounded-lg py-2 px-4 my-2 font-medium text-lg"
+        data-checkout-mode="payment" data-price-id="price_HNuGM2l9zDuXA8">
+        Series A ($7500)
+      </button>
     </div>
-    <div class="banner">
-      <span>
-        This is a
-        <a href="https://github.com/stripe-samples"> Stripe Sample </a> on how
-        to use Stripe Checkout on GitHub Pages.
-        <a
-          href="https://github.com/stripe-samples/github-pages-stripe-checkout"
-        >
-          View code on GitHub.
-        </a>
-      </span>
-    </div>
+    <p class="text-sm text-center my-3">Powered by <a style="color: hsl(231, 41%, 29%);" href="//stripe.com">Stripe</a>
+    </p>
 
-    <script>
-      // Replace with your own publishable key: https://dashboard.stripe.com/test/apikeys
-      var PUBLISHABLE_KEY = 'pk_test_Tr8olTkdFnnJVywwhNPHwnHK00HkHV4tnP';
-      // Replace with the domain you want your users to be redirected back to after payment
-      var DOMAIN = location.href.replace(/[^/]*$/, '');
+  </div>
 
-      if (PUBLISHABLE_KEY === 'pk_test_Tr8olTkdFnnJVywwhNPHwnHK00HkHV4tnP') {
-        console.log(
-          'Replace the hardcoded publishable key with your own publishable key: https://dashboard.stripe.com/test/apikeys'
-        );
+  <script>
+    // Replace with your own publishable key: https://dashboard.stripe.com/test/apikeys
+    var PUBLISHABLE_KEY = 'pk_live_mHv0UH3GAjxMhgfda1CwTZEH004KRH3hDD';
+    // Replace with the domain you want your users to be redirected back to after payment
+    var DOMAIN = location.href.replace(/[^/]*$/, '');
+    var stripe = Stripe(PUBLISHABLE_KEY);
+
+    // Handle any errors from Checkout
+    var handleResult = function (result) {
+      if (result.error) {
+        var displayError = document.getElementById('error-message');
+        displayError.textContent = result.error.message;
+        displayError.style.display = "";
       }
+    };
 
-      var stripe = Stripe(PUBLISHABLE_KEY);
+    document.querySelectorAll('button').forEach(function (button) {
+      button.addEventListener('click', function (e) {
+        var mode = e.target.dataset.checkoutMode;
+        var priceId = e.target.dataset.priceId;
+        var items = [{ price: priceId, quantity: 1 }];
 
-      // Handle any errors from Checkout
-      var handleResult = function (result) {
-        if (result.error) {
-          var displayError = document.getElementById('error-message');
-          displayError.textContent = result.error.message;
-        }
-      };
-
-      document.querySelectorAll('button').forEach(function (button) {
-        button.addEventListener('click', function (e) {
-          var mode = e.target.dataset.checkoutMode;
-          var priceId = e.target.dataset.priceId;
-          var items = [{ price: priceId, quantity: 1 }];
-
-          // Make the call to Stripe.js to redirect to the checkout page
-          // with the sku or plan ID.
-          stripe
-            .redirectToCheckout({
-              mode: mode,
-              lineItems: items,
-              successUrl:
-                DOMAIN + 'success.html?session_id={CHECKOUT_SESSION_ID}',
-              cancelUrl:
-                DOMAIN + 'canceled.html?session_id={CHECKOUT_SESSION_ID}',
-            })
-            .then(handleResult);
-        });
+        // Make the call to Stripe.js to redirect to the checkout page
+        // with the sku or plan ID.
+        stripe
+          .redirectToCheckout({
+            mode: mode,
+            lineItems: items,
+            successUrl:
+              DOMAIN + 'success.html?session_id={CHECKOUT_SESSION_ID}',
+            cancelUrl:
+              DOMAIN,
+          })
+          .then(handleResult);
       });
-    </script>
-  </body>
+    });
+  </script>
+</body>
+
 </html>
